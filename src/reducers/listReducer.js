@@ -29,7 +29,7 @@ const addAll = (list, items, comparator = null) => {
   let newList = list
   items.forEach(item => {
     const test = comparator ? element => comparator(element, item) : element => element === item
-    newList = newList && !_.find(newList, test) ? [...newList, item] : newList
+    newList && !_.find(newList, test) && newList.push(item)
   })
   return newList
 }
