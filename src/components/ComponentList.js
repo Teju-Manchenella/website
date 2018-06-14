@@ -7,7 +7,7 @@ import { RowEntityList, CopyUrlButton, DefinitionEntry } from './'
 import { Button, OverlayTrigger, Tooltip, ButtonGroup } from 'react-bootstrap'
 import { get } from 'lodash'
 import EntitySpec from '../utils/entitySpec'
-import { getBadgeUrl } from '../api/clearlyDefined'
+import getBadge from '../utils/shields'
 import { ROUTE_INSPECT } from '../utils/routingConstants'
 
 export default class ComponentList extends React.Component {
@@ -28,7 +28,7 @@ export default class ComponentList extends React.Component {
   }
 
   static defaultProps = {
-    loadMoreRows: () => { }
+    loadMoreRows: () => {}
   }
 
   constructor(props) {
@@ -105,13 +105,21 @@ export default class ComponentList extends React.Component {
     return ['github', 'sourcearchive'].includes(component.provider)
   }
 
+  getDefinitionScore(definition) {
+    const hasLicense = get(definition, 'licensed.declared')
+    const hasAttributionParties = get(definition, 'licensed.attribution.parties[0]')
+    if (hasLicense && hasAttributionParties) return 2
+    if (hasLicense || hasAttributionParties) return 1
+    return 0
+  }
+
   renderButtons(definition) {
     const component = EntitySpec.fromCoordinates(definition.coordinates)
     const isSourceComponent = this.isSourceComponent(component)
+    const score = this.getDefinitionScore(definition)
     return (
       <div className="list-activity-area">
-        {/* <img className='list-buttons' width='45px' src={two} alt='score'/> */}
-        <img className="list-buttons" src={getBadgeUrl(component)} alt="score" />
+        {getBadge(score)}
         <ButtonGroup>
           {!isSourceComponent && (
             <Button className="list-hybrid-button" onClick={this.addSourceForComponent.bind(this, component)}>
