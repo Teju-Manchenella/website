@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Grid, Row, Col, Button } from 'react-bootstrap'
 import { ROUTE_DEFINITIONS, ROUTE_INSPECT, ROUTE_CURATE } from '../utils/routingConstants'
-import { getDefinitionsAction } from '../actions/definitionActions'
+import { getDefinitionsAction, getBadgesAction } from '../actions/definitionActions'
 import { curateAction } from '../actions/curationActions'
 import { FilterBar, ComponentList, Section, FacetSelect, ContributePrompt } from './'
 import { uiNavigation, uiBrowseUpdateList, uiBrowseUpdateFilterList, uiNotificationNew } from '../actions/ui'
@@ -39,15 +39,16 @@ class PageDefinitions extends Component {
   }
 
   onAddComponent(value, after = null) {
-    const { dispatch, token, definitions } = this.props
+    const { dispatch, token, definitions, badges } = this.props
     const component = typeof value === 'string' ? EntitySpec.fromPath(value) : value
     const path = component.toPath()
     !definitions.entries[path] && dispatch(getDefinitionsAction(token, [path]))
+    !badges.entries[path] && dispatch(getBadgesAction(component))
     dispatch(uiBrowseUpdateList({ add: component }))
   }
 
   onDrop(acceptedFiles, rejectedFiles) {
-    const { dispatch, token, definitions } = this.props
+    const { dispatch, token, definitions, badges } = this.props
     dispatch(uiNotificationNew({ type: 'info', message: 'Loading component list from file(s)', timeout: 5000 }))
     acceptedFiles.forEach(file => {
       const reader = new FileReader()
@@ -57,15 +58,18 @@ class PageDefinitions extends Component {
           const message = `Invalid component list file: ${listSpec}`
           return dispatch(uiNotificationNew({ type: 'info', message, timeout: 5000 }))
         }
+        const specs = []
         listSpec.coordinates.forEach(component => {
           // TODO figure a way to add these in bulk. One by one will be painful for large lists
           const spec = EntitySpec.validateAndCreate(component)
           if (spec) {
             const path = spec.toPath()
             !definitions.entries[path] && dispatch(getDefinitionsAction(token, [path]))
-            dispatch(uiBrowseUpdateList({ add: spec }))
+            !badges.entries[path] && dispatch(getBadgesAction(component))
+            specs.push(spec)
           }
         })
+        dispatch(uiBrowseUpdateList({ addAll: specs }))
       }
       reader.readAsBinaryString(file)
     })
@@ -209,7 +213,7 @@ class PageDefinitions extends Component {
   }
 
   render() {
-    const { components, filterOptions, definitions, token } = this.props
+    const { components, filterOptions, definitions, token, badges } = this.props
     const { activeFacets, dropzoneActive } = this.state
     return (
       <Grid className="main-container">
@@ -234,6 +238,7 @@ class PageDefinitions extends Component {
                 onInspect={this.onInspect}
                 onCurate={this.onCurate}
                 definitions={definitions}
+                badges={badges}
                 githubToken={token}
                 noRowsRenderer={this.noRowsRenderer}
                 activeFacets={activeFacets}
@@ -252,7 +257,8 @@ function mapStateToProps(state, ownProps) {
     filterValue: state.ui.browse.filter,
     filterOptions: state.ui.browse.filterList,
     components: state.ui.browse.componentList,
-    definitions: state.definition.bodies
+    definitions: state.definition.bodies,
+    badges: state.definition.badges
   }
 }
 export default connect(mapStateToProps)(PageDefinitions)

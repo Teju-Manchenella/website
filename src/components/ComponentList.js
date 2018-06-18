@@ -3,14 +3,15 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
 import { RowEntityList, CopyUrlButton, DefinitionEntry } from './'
 import { Button, OverlayTrigger, Tooltip, ButtonGroup } from 'react-bootstrap'
 import { get } from 'lodash'
 import EntitySpec from '../utils/entitySpec'
-import { getBadgeUrl } from '../api/clearlyDefined'
+import { getBadgesAction } from '../actions/definitionActions'
 import { ROUTE_INSPECT } from '../utils/routingConstants'
 
-export default class ComponentList extends React.Component {
+class ComponentList extends React.Component {
   static propTypes = {
     list: PropTypes.object.isRequired,
     listHeight: PropTypes.number,
@@ -24,11 +25,12 @@ export default class ComponentList extends React.Component {
     fetchingRenderer: PropTypes.func,
     activeFacets: PropTypes.array,
     definitions: PropTypes.object,
+    badges: PropTypes.object,
     githubToken: PropTypes.string
   }
 
   static defaultProps = {
-    loadMoreRows: () => { }
+    loadMoreRows: () => {}
   }
 
   constructor(props) {
@@ -43,6 +45,7 @@ export default class ComponentList extends React.Component {
   componentWillReceiveProps(newProps) {
     if (newProps.definitions.sequence !== this.props.definitions.sequence) this.incrementSequence()
     if (newProps.activeFacets !== this.props.activeFacets) this.incrementSequence()
+    if (JSON.stringify(newProps.badges) !== JSON.stringify(this.props.badges)) this.incrementSequence()
   }
 
   getDefinition(component) {
@@ -105,13 +108,27 @@ export default class ComponentList extends React.Component {
     return ['github', 'sourcearchive'].includes(component.provider)
   }
 
+  getBadge(component) {
+    const { dispatch, badges } = this.props
+    const path = component.toPath()
+    !badges.entries[path] && dispatch(getBadgesAction(component))
+    if (badges.entries[path]) {
+      return badges.entries[path]
+    }
+    return 'Computing Score...'
+  }
+
   renderButtons(definition) {
     const component = EntitySpec.fromCoordinates(definition.coordinates)
+    const svgTag = this.getBadge(component)
+
     const isSourceComponent = this.isSourceComponent(component)
     return (
       <div className="list-activity-area">
-        {/* <img className='list-buttons' width='45px' src={two} alt='score'/> */}
-        <img className="list-buttons" src={getBadgeUrl(component)} alt="score" />
+        {/* {this.getBadge(component).then(res => {
+          return <div dangerouslySetInnerHTML={{ __html: `${res}` }} />
+        })} */}
+        <div className="list-buttons" dangerouslySetInnerHTML={{ __html: `${svgTag}` }} />
         <ButtonGroup>
           {!isSourceComponent && (
             <Button className="list-hybrid-button" onClick={this.addSourceForComponent.bind(this, component)}>
@@ -181,3 +198,11 @@ export default class ComponentList extends React.Component {
     )
   }
 }
+
+function mapStateToProps(state, ownProps) {
+  return {
+    badges: state.definition.badges
+  }
+}
+
+export default connect(mapStateToProps)(ComponentList)

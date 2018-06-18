@@ -7,8 +7,8 @@ import 'react-bootstrap-typeahead/css/Typeahead.css'
 
 export default class InlineEditor extends React.Component {
   static propTypes = {
-    initialValue: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    initialValue: PropTypes.string,
+    value: PropTypes.string,
     type: PropTypes.oneOf(['text']).isRequired,
     onChange: PropTypes.func.isRequired,
     placeholder: PropTypes.string.isRequired
@@ -51,9 +51,12 @@ export default class InlineEditor extends React.Component {
     const changed = initialValue !== value
     if (!editing)
       return (
-        <span className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`} onClick={() => this.setState({ editing: true })}>
+        <span
+          className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`}
+          onClick={() => this.setState({ editing: true })}
+        >
           {this.renderers[type](value) || placeholder}
-        </span >
+        </span>
       )
 
     return React.cloneElement(this.editors[type](value), {

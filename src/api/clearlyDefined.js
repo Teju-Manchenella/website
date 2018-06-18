@@ -45,7 +45,6 @@ export function getCuration(token, entity) {
   return get(url(`${CURATIONS}/${entity.toPath()}`), token)
 }
 
-
 export function curate(token, spec) {
   return patch(url(`${CURATIONS}`), token, spec)
 }
@@ -66,8 +65,10 @@ export function previewDefinition(token, entity, curation) {
   return post(url(`${DEFINITIONS}/${entity.toPath()}`, { preview: true }), token, curation)
 }
 
-export function getBadgeUrl(entity) {
-  return url(`${BADGES}/${entity.toPath()}`)
+export function getBadge(entity) {
+  return get(
+    url(`${BADGES}/${entity.toPath()}`, { 'Content-Type': 'image/svg+xml;charset=fetch utf-8', mode: 'no-cors' })
+  )
 }
 
 export function getGitHubSearch(token, path) {

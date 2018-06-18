@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 import { asyncActions } from './'
-import { getDefinitions, getDefinition, previewDefinition, getDefinitionSuggestions } from '../api/clearlyDefined'
+import {
+  getDefinitions,
+  getDefinition,
+  previewDefinition,
+  getDefinitionSuggestions,
+  getBadge
+} from '../api/clearlyDefined'
 
 export const DEFINITION_LIST = 'DEFINITION_LIST'
 export const DEFINITION_BODIES = 'DEFINITION_BODIES'
+export const DEFINITION_BADGES = 'DEFINITION_BADGES'
 
 export function getDefinitionAction(token, entity, name) {
   return dispatch => {
@@ -24,6 +31,17 @@ export function getDefinitionsAction(token, entities) {
     dispatch(actions.start())
     return getDefinitions(token, entities).then(
       result => dispatch(actions.success({ add: result })),
+      error => dispatch(actions.error(error))
+    )
+  }
+}
+
+export function getBadgesAction(entity) {
+  return dispatch => {
+    const actions = asyncActions(DEFINITION_BADGES)
+    dispatch(actions.start())
+    return getBadge(entity).then(
+      result => dispatch(actions.success({ add: { [entity.toPath()]: result.svgTag } })),
       error => dispatch(actions.error(error))
     )
   }
