@@ -13,7 +13,6 @@ import EntitySpec from '../utils/entitySpec'
 import { set, get, find } from 'lodash'
 import { saveAs } from 'file-saver'
 import Dropzone from 'react-dropzone'
-const throat = require('throat')
 
 const defaultFacets = [{ value: 'core', label: 'Core' }]
 
@@ -59,17 +58,15 @@ class PageDefinitions extends Component {
           return dispatch(uiNotificationNew({ type: 'info', message, timeout: 5000 }))
         }
         const specs = []
-        listSpec.coordinates.forEach(
-          throat(1, component => {
-            // TODO figure a way to add these in bulk. One by one will be painful for large lists
-            const spec = EntitySpec.validateAndCreate(component)
-            if (spec) {
-              const path = spec.toPath()
-              !definitions.entries[path] && dispatch(getDefinitionsAction(token, [path]))
-              specs.push(spec)
-            }
-          })
-        )
+        listSpec.coordinates.forEach(component => {
+          // TODO figure a way to add these in bulk. One by one will be painful for large lists
+          const spec = EntitySpec.validateAndCreate(component)
+          if (spec) {
+            const path = spec.toPath()
+            !definitions.entries[path] && dispatch(getDefinitionsAction(token, [path]))
+            specs.push(spec)
+          }
+        })
         dispatch(uiBrowseUpdateList({ addAll: specs }))
       }
       reader.readAsBinaryString(file)

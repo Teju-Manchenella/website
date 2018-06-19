@@ -39,7 +39,7 @@ export function getDefinitionsAction(token, entities) {
 export function getBadgesAction(score) {
   return dispatch => {
     const actions = asyncActions(DEFINITION_BADGES)
-    dispatch(actions.success({ add: { [score]: 'Loading...' } }))
+    dispatch(actions.start())
     return getBadge(score).then(
       result => dispatch(actions.success({ add: result })),
       error => dispatch(actions.error(error))
