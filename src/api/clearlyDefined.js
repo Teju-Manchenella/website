@@ -65,10 +65,8 @@ export function previewDefinition(token, entity, curation) {
   return post(url(`${DEFINITIONS}/${entity.toPath()}`, { preview: true }), token, curation)
 }
 
-export function getBadge(entity) {
-  return get(
-    url(`${BADGES}/${entity.toPath()}`, { 'Content-Type': 'image/svg+xml;charset=fetch utf-8', mode: 'no-cors' })
-  )
+export function getBadge(score) {
+  return get(url(`${BADGES}/${score}`, { 'Content-Type': 'image/svg+xml;charset=fetch utf-8', mode: 'no-cors' }))
 }
 
 export function getGitHubSearch(token, path) {

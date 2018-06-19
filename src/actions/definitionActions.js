@@ -36,12 +36,12 @@ export function getDefinitionsAction(token, entities) {
   }
 }
 
-export function getBadgesAction(entity) {
+export function getBadgesAction(score) {
   return dispatch => {
     const actions = asyncActions(DEFINITION_BADGES)
-    dispatch(actions.start())
-    return getBadge(entity).then(
-      result => dispatch(actions.success({ add: { [entity.toPath()]: result.svgTag } })),
+    dispatch(actions.success({ add: { [score]: 'Loading...' } }))
+    return getBadge(score).then(
+      result => dispatch(actions.success({ add: result })),
       error => dispatch(actions.error(error))
     )
   }

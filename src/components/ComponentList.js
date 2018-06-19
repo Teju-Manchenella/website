@@ -10,6 +10,7 @@ import { get } from 'lodash'
 import EntitySpec from '../utils/entitySpec'
 import { getBadgesAction } from '../actions/definitionActions'
 import { ROUTE_INSPECT } from '../utils/routingConstants'
+import BadgeCalculator from '../utils/badgeCalculator'
 
 class ComponentList extends React.Component {
   static propTypes = {
@@ -110,25 +111,26 @@ class ComponentList extends React.Component {
 
   getBadge(component) {
     const { dispatch, badges } = this.props
-    const path = component.toPath()
-    !badges.entries[path] && dispatch(getBadgesAction(component))
-    if (badges.entries[path]) {
-      return badges.entries[path]
+    const definition = this.getDefinition(component)
+    const badgeCalculator = new BadgeCalculator(definition)
+    const score = badgeCalculator.calculateScore()
+    !badges.entries[score] && dispatch(getBadgesAction(score))
+    if (badges.entries[score]) {
+      return badges.entries[score]
     }
     return 'Computing Score...'
   }
 
   renderButtons(definition) {
     const component = EntitySpec.fromCoordinates(definition.coordinates)
-    const svgTag = this.getBadge(component)
-
+    const svg = this.getBadge(component)
     const isSourceComponent = this.isSourceComponent(component)
     return (
       <div className="list-activity-area">
         {/* {this.getBadge(component).then(res => {
           return <div dangerouslySetInnerHTML={{ __html: `${res}` }} />
         })} */}
-        <div className="list-buttons" dangerouslySetInnerHTML={{ __html: `${svgTag}` }} />
+        <div className="list-buttons" dangerouslySetInnerHTML={{ __html: `${svg}` }} />
         <ButtonGroup>
           {!isSourceComponent && (
             <Button className="list-hybrid-button" onClick={this.addSourceForComponent.bind(this, component)}>
