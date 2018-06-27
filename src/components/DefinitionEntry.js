@@ -165,7 +165,8 @@ export default class DefinitionEntry extends React.Component {
   parseCoordinates(value) {
     if (!value) return null
     const segments = value.split('/')
-    return { type: 'git', provider: 'github', url: value, revision: segments[6] }
+    const newUrl = segments.slice(0, 5).join('/')
+    return { type: 'git', provider: 'github', url: newUrl, revision: segments[6] }
   }
 
   renderLabel(text, editable = false) {
@@ -223,7 +224,10 @@ export default class DefinitionEntry extends React.Component {
                 initialValue={this.printCoordinates(this.getOriginalValue('described.sourceLocation'))}
                 value={this.printCoordinates(this.getValue('described.sourceLocation'))}
                 onChange={this.fieldChange('described.sourceLocation', isEqual, this.parseCoordinates)}
-                validator={value => true}
+                validator={value => {
+                  const pattern = new RegExp('https://github.com/.+/.+/commit/([\\w\\s]{40}|[\\w\\s]{6})')
+                  return pattern.test(value)
+                }}
                 placeholder={'Source location'}
               />
             </Col>
@@ -236,7 +240,10 @@ export default class DefinitionEntry extends React.Component {
                 initialValue={this.printDate(this.getOriginalValue('described.releaseDate'))}
                 value={this.printDate(this.getValue('described.releaseDate'))}
                 onChange={this.fieldChange('described.releaseDate')}
-                validator={value => true}
+                validator={value => {
+                  const date = moment(value, 'YYYY-MM-DD')
+                  return date.isValid()
+                }}
                 placeholder={'YYYY-MM-DD'}
               />
             </Col>

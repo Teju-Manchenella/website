@@ -11,7 +11,8 @@ export default class InlineEditor extends React.Component {
     value: PropTypes.string.isRequired,
     type: PropTypes.oneOf(['text']).isRequired,
     onChange: PropTypes.func.isRequired,
-    placeholder: PropTypes.string.isRequired
+    placeholder: PropTypes.string.isRequired,
+    validator: PropTypes.func
   }
 
   static defaultProps = {
@@ -28,14 +29,16 @@ export default class InlineEditor extends React.Component {
   }
 
   onChange = event => {
-    const { value, onChange } = this.props
+    const { value, onChange, validator } = this.props
     const target = event.target
 
     // check browser validation (if used)
     if (!target.checkValidity()) return
 
     this.setState({ editing: false })
-
+    if (validator && !validator(target.value)) {
+      return
+    }
     // sanity check for empty textboxes
     if (typeof target.value === 'string' && target.value.trim().length === 0) return this.renderValue()
 
@@ -51,9 +54,12 @@ export default class InlineEditor extends React.Component {
     const changed = initialValue !== value
     if (!editing)
       return (
-        <span className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`} onClick={() => this.setState({ editing: true })}>
+        <span
+          className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`}
+          onClick={() => this.setState({ editing: true })}
+        >
           {this.renderers[type](value) || placeholder}
-        </span >
+        </span>
       )
 
     return React.cloneElement(this.editors[type](value), {
