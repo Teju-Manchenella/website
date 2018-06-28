@@ -243,7 +243,7 @@ export default class DefinitionEntry extends React.Component {
                 value={this.printDate(this.getValue('described.releaseDate'))}
                 onChange={this.fieldChange('described.releaseDate')}
                 validator={value => {
-                  const date = moment(value, 'YYYY-MM-DD')
+                  const date = moment(value, 'YYYY-MM-DD', true)
                   return date.isValid()
                 }}
                 placeholder={'YYYY-MM-DD'}

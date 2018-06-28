@@ -28,14 +28,6 @@ export default class InlineEditor extends React.Component {
     this.state = { editing: false, validCheck: true }
   }
 
-  setValidCheck() {
-    this.setState({ validCheck: false })
-  }
-
-  focus = ref => {
-    if (ref && ref.focus) ref.focus()
-  }
-
   onChange = event => {
     const { value, onChange, validator } = this.props
     const target = event.target
@@ -45,7 +37,8 @@ export default class InlineEditor extends React.Component {
 
     this.setState({ editing: false })
     if (validator && !validator(target.value)) {
-      this.setValidCheck()
+      this.setState({ validCheck: false })
+      setTimeout(() => this.setState({ validCheck: true }), 2000)
       return
     }
     this.setState({ validCheck: true })
@@ -62,18 +55,25 @@ export default class InlineEditor extends React.Component {
     const { value, type, initialValue, placeholder, tipString } = this.props
     const { editing, validCheck } = this.state
     const changed = initialValue !== value
-    const tip = <Tooltip id="overload-left">{tipString}</Tooltip>
 
     if (!editing)
       return (
-        <OverlayTrigger placement="top" overlay={tip}>
-          <span
-            className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`}
-            onClick={() => this.setState({ editing: true })}
-          >
-            {this.renderers[type](value) || placeholder}
-          </span>
-        </OverlayTrigger>
+        <span
+          className={`editable-field ${
+            value
+              ? !validCheck
+                ? 'bg-danger'
+                : changed
+                  ? 'bg-info'
+                  : ''
+              : !validCheck
+                ? 'bg-danger'
+                : 'placeholder-text'
+          }`}
+          onClick={() => this.setState({ editing: true })}
+        >
+          {this.renderers[type](value) || placeholder}
+        </span>
       )
 
     return React.cloneElement(this.editors[type](value), {
@@ -97,6 +97,6 @@ export default class InlineEditor extends React.Component {
   }
 
   editors = {
-    text: value => <input type="date" defaultValue={value} ref={this.props.id} />
+    text: value => <input type="text" defaultValue={value} />
   }
 }
