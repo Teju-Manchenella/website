@@ -213,6 +213,7 @@ export default class DefinitionEntry extends React.Component {
                 onChange={this.fieldChange('licensed.declared')}
                 validator={value => true}
                 placeholder={'SPDX license'}
+                id={'licensed.declared'}
               />
             </Col>
           </Row>
@@ -225,10 +226,11 @@ export default class DefinitionEntry extends React.Component {
                 value={this.printCoordinates(this.getValue('described.sourceLocation'))}
                 onChange={this.fieldChange('described.sourceLocation', isEqual, this.parseCoordinates)}
                 validator={value => {
-                  const pattern = new RegExp('https://github.com/.+/.+/commit/([\\w\\s]{40}|[\\w\\s]{6})')
+                  const pattern = new RegExp('^https://github.com/.+/.+/commit/([\\w\\s]{40}|[\\w\\s]{6})$')
                   return pattern.test(value)
                 }}
                 placeholder={'Source location'}
+                tipString={'Format as  https://github.com/{name}/{namespace}/commit/{commit_hash}'}
               />
             </Col>
           </Row>
@@ -245,6 +247,7 @@ export default class DefinitionEntry extends React.Component {
                   return date.isValid()
                 }}
                 placeholder={'YYYY-MM-DD'}
+                tipString={'Format as YYYY-MM-DD'}
               />
             </Col>
           </Row>

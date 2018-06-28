@@ -3,6 +3,9 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import ReactDOM from 'react-dom'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 
 export default class InlineEditor extends React.Component {
@@ -12,7 +15,8 @@ export default class InlineEditor extends React.Component {
     type: PropTypes.oneOf(['text']).isRequired,
     onChange: PropTypes.func.isRequired,
     placeholder: PropTypes.string.isRequired,
-    validator: PropTypes.func
+    validator: PropTypes.func,
+    tipString: PropTypes.string
   }
 
   static defaultProps = {
@@ -21,7 +25,11 @@ export default class InlineEditor extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = { editing: false }
+    this.state = { editing: false, validCheck: true }
+  }
+
+  setValidCheck() {
+    this.setState({ validCheck: false })
   }
 
   focus = ref => {
@@ -37,8 +45,10 @@ export default class InlineEditor extends React.Component {
 
     this.setState({ editing: false })
     if (validator && !validator(target.value)) {
+      this.setValidCheck()
       return
     }
+    this.setState({ validCheck: true })
     // sanity check for empty textboxes
     if (typeof target.value === 'string' && target.value.trim().length === 0) return this.renderValue()
 
@@ -49,17 +59,21 @@ export default class InlineEditor extends React.Component {
   }
 
   renderValue() {
-    const { value, type, initialValue, placeholder } = this.props
-    const { editing } = this.state
+    const { value, type, initialValue, placeholder, tipString } = this.props
+    const { editing, validCheck } = this.state
     const changed = initialValue !== value
+    const tip = <Tooltip id="overload-left">{tipString}</Tooltip>
+
     if (!editing)
       return (
-        <span
-          className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`}
-          onClick={() => this.setState({ editing: true })}
-        >
-          {this.renderers[type](value) || placeholder}
-        </span>
+        <OverlayTrigger placement="top" overlay={tip}>
+          <span
+            className={`editable-field ${value ? (changed ? 'bg-info' : '') : 'placeholder-text'}`}
+            onClick={() => this.setState({ editing: true })}
+          >
+            {this.renderers[type](value) || placeholder}
+          </span>
+        </OverlayTrigger>
       )
 
     return React.cloneElement(this.editors[type](value), {
@@ -83,6 +97,6 @@ export default class InlineEditor extends React.Component {
   }
 
   editors = {
-    text: value => <input type="text" defaultValue={value} />
+    text: value => <input type="date" defaultValue={value} ref={this.props.id} />
   }
 }
