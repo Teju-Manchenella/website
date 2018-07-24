@@ -18,6 +18,7 @@ import {
 } from './'
 import { uiNavigation, uiHarvestUpdateQueue, uiNotificationNew } from '../actions/ui'
 import EntitySpec from '../utils/entitySpec'
+import Dropzone from 'react-dropzone'
 
 class PageHarvest extends Component {
   constructor(props) {
@@ -28,6 +29,53 @@ class PageHarvest extends Component {
     this.onRemoveRequest = this.onRemoveRequest.bind(this)
     this.onChangeRequest = this.onChangeRequest.bind(this)
     this.onClick = this.onClick.bind(this)
+    this.onDrop = this.onDrop.bind(this)
+  }
+
+  onDrop(acceptedFiles, rejectedFiles) {
+    const { dispatch } = this.props
+    dispatch(uiNotificationNew({ type: 'info', message: 'Loading component list from file(s)', timeout: 5000 }))
+    acceptedFiles.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const listSpec = this.loadListSpec(reader.result, file)
+        if (typeof listSpec === 'string') {
+          const message = `Invalid component list file: ${listSpec}`
+          return dispatch(uiNotificationNew({ type: 'info', message, timeout: 5000 }))
+        }
+        listSpec.coordinates.forEach(component => {
+          const spec = EntitySpec.validateAndCreate(component)
+          if (spec) {
+            dispatch(uiHarvestUpdateQueue({ add: spec }))
+          }
+        })
+      }
+      reader.readAsBinaryString(file)
+    })
+  }
+
+  loadListSpec(content, file) {
+    try {
+      const object = JSON.parse(content)
+      if (file.name.toLowerCase() === 'package-lock.json') return this.loadPackageLockFile(object.dependencies)
+      if (object.coordinates) return object
+      return 'No component coordinates found'
+    } catch (e) {
+      return e.message
+    }
+  }
+
+  loadPackageLockFile(dependencies) {
+    const coordinates = []
+    for (const dependency in dependencies) {
+      let [namespace, name] = dependency.split('/')
+      if (!name) {
+        name = namespace
+        namespace = null
+      }
+      coordinates.push({ type: 'npm', provider: 'npmjs', namespace, name, revision: dependencies[dependency].version })
+    }
+    return { coordinates }
   }
 
   componentDidMount() {
@@ -121,16 +169,18 @@ class PageHarvest extends Component {
           </Col>
         </Row>
         <Section name={'Components to harvest'} actionButton={this.renderActionButton()}>
-          <div className="section-body">
-            <HarvestQueueList
-              list={queue.list}
-              listHeight={1000}
-              onRemove={this.onRemoveRequest}
-              onChange={this.onChangeRequest}
-              githubToken={token}
-              noRowsRenderer={this.noRowsRenderer}
-            />
-          </div>
+          <Dropzone disableClick onDrop={this.onDrop} style={{ position: 'relative' }}>
+            <div className="section-body">
+              <HarvestQueueList
+                list={queue.list}
+                listHeight={1000}
+                onRemove={this.onRemoveRequest}
+                onChange={this.onChangeRequest}
+                githubToken={token}
+                noRowsRenderer={this.noRowsRenderer}
+              />
+            </div>
+          </Dropzone>
         </Section>
       </Grid>
     )

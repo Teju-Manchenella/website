@@ -74,19 +74,39 @@ export default class HarvestQueueList extends React.Component {
           />
         )}
         {request.provider === 'npmjs' && (
-          <NpmVersionPicker request={request} onChange={this.versionChanged.bind(this, request)} />
+          <NpmVersionPicker
+            request={request}
+            defaultInputValue={request.revision ? request.revision : ''}
+            onChange={this.versionChanged.bind(this, request)}
+          />
         )}
         {request.provider === 'mavencentral' && (
-          <MavenVersionPicker request={request} onChange={this.versionChanged.bind(this, request)} />
+          <MavenVersionPicker
+            request={request}
+            defaultInputValue={request.revision ? request.revision : ''}
+            onChange={this.versionChanged.bind(this, request)}
+          />
         )}
         {request.provider === 'pypi' && (
-          <PyPiVersionPicker request={request} onChange={this.versionChanged.bind(this, request)} />
+          <PyPiVersionPicker
+            request={request}
+            defaultInputValue={request.revision ? request.revision : ''}
+            onChange={this.versionChanged.bind(this, request)}
+          />
         )}
         {request.provider === 'rubygems' && (
-          <RubyGemsVersionPicker request={request} onChange={this.versionChanged.bind(this, request)} />
+          <RubyGemsVersionPicker
+            request={request}
+            defaultInputValue={request.revision ? request.revision : ''}
+            onChange={this.versionChanged.bind(this, request)}
+          />
         )}
         {request.provider === 'nuget' && (
-          <NuGetVersionPicker request={request} onChange={this.versionChanged.bind(this, request)} />
+          <NuGetVersionPicker
+            request={request}
+            defaultInputValue={request.revision ? request.revision : ''}
+            onChange={this.versionChanged.bind(this, request)}
+          />
         )}
         <i className="fas fa-times list-remove" onClick={this.removeRequest.bind(this, request)} />
       </div>
