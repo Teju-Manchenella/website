@@ -59,6 +59,10 @@ export function getContributionData(token, entity) {
   return get(url(`${CURATIONS}/pr/${entity}`), token)
 }
 
+export function getContributionPr(token) {
+  return get(url(`${CURATIONS}/pr`), token)
+}
+
 export function getDefinitions(token, list) {
   return post(url(`${DEFINITIONS}`), token, list)
 }

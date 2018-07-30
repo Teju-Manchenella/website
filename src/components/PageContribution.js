@@ -4,10 +4,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Button } from 'react-bootstrap'
-import { uiContributionGetData, uiContributionUpdateList } from '../actions/ui'
+import { uiContributionGetData, uiContributionUpdateList, uiContributionGetRequests } from '../actions/ui'
 import { ROUTE_CONTRIBUTION } from '../utils/routingConstants'
 import { uiNavigation } from '../actions/ui'
 import AbstractPageDefinitions from './AbstractPageDefinitions'
+import { Grid, DropdownButton, MenuItem } from 'react-bootstrap'
+import { AsyncTypeahead } from 'react-bootstrap-typeahead'
 
 class PageContribution extends AbstractPageDefinitions {
   constructor(props) {
@@ -16,9 +18,9 @@ class PageContribution extends AbstractPageDefinitions {
 
   componentDidMount() {
     const { dispatch, prNumber, token } = this.props
-
     dispatch(uiNavigation({ to: ROUTE_CONTRIBUTION }))
-    dispatch(uiContributionGetData(token, prNumber))
+    dispatch(uiContributionGetRequests(token, prNumber))
+    if (prNumber) dispatch(uiContributionGetData(token, prNumber))
   }
 
   noRowsRenderer() {
@@ -26,9 +28,29 @@ class PageContribution extends AbstractPageDefinitions {
   }
 
   tableTitle() {
-    const { prNumber } = this.props
+    const { prNumber, pr } = this.props
     const linkBack = this.props.url.isFetched ? <a href={this.props.url.item}>#{prNumber}</a> : `#${prNumber}`
-    return <span>Definitions from pull request {linkBack}</span>
+    const pullRequests = (
+      <DropdownButton className="list-button" bsStyle="default" pullRight id="id">
+        {pr.list.length > 0 &&
+          pr.list.map((pullRequest, index) => {
+            return (
+              <MenuItem
+                className="page-definitions__menu-item"
+                key={index}
+                eventKey={{ type: index, value: pullRequest }}
+              >
+                {pullRequest}
+              </MenuItem>
+            )
+          })}
+      </DropdownButton>
+    )
+    return (
+      <span>
+        Definitions from pull request {linkBack} {pullRequests}
+      </span>
+    )
   }
 
   renderSearchBar() {}
@@ -64,6 +86,7 @@ function mapStateToProps(state, ownProps) {
     url: state.ui.contribution.url,
     definitions: state.ui.contribution.definitions,
     components: state.ui.contribution.componentList,
+    pr: state.ui.contribution.pr,
     filterValue: state.ui.browse.filter,
     filterOptions: state.ui.browse.filterList
   }

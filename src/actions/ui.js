@@ -4,7 +4,7 @@
 import { getCurationAction } from './curationActions'
 import { getDefinitionAction, previewDefinitionAction, getDefinitionSuggestionsAction } from './definitionActions'
 import { getHarvestOutputAction } from './harvestActions'
-import { getPrDataAction } from './prActions'
+import { getPrDataAction, getPr } from './prActions'
 
 export const UI_NAVIGATION = 'UI_NAVIGATION'
 export const UI_REDIRECT = 'UI_REDIRECT'
@@ -21,6 +21,7 @@ export const UI_INSPECT_GET_HARVESTED = 'UI_INSPECT_GET_HARVESTED'
 export const UI_CONTRIBUTION_GET_URL = 'UI_CONTRIBUTION_GET_URL'
 export const UI_CONTRIBUTION_UPDATE_LIST = 'UI_CONTRIBUTION_UPDATE_LIST'
 export const UI_CONTRIBUTION_DEFINITIONS = 'UI_CONTRIBUTION_DEFINITIONS'
+export const UI_CONTRIBUTION_PULL_REQUESTS = 'UI_CONTRIBUTION_PULL_REQUESTS'
 
 export const UI_CURATE_UPDATE_FILTER = 'UI_CURATE_UPDATE_FILTER'
 export const UI_CURATE_UPDATE_FILTER_LIST = 'UI_CURATE_UPDATE_FILTER_LIST'
@@ -78,12 +79,20 @@ export function uiContributionGetData(token, entity) {
   return getPrDataAction(token, entity)
 }
 
+export function uiContributionGetRequests(token) {
+  return getPr(token)
+}
+
 export function uiContributionUpdateList(value) {
   return { type: UI_CONTRIBUTION_UPDATE_LIST, result: value }
 }
 
 export function uiContributionDefinitions(value) {
   return { type: UI_CONTRIBUTION_DEFINITIONS, result: value }
+}
+
+export function uiContributionRequests(value) {
+  return { type: UI_CONTRIBUTION_PULL_REQUESTS, result: value }
 }
 
 export function uiCurateUpdateFilter(value) {

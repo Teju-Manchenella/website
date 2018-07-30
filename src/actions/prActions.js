@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 import { asyncActions } from './'
-import { getContributionData, getDefinition } from '../api/clearlyDefined'
+import { getContributionData, getDefinition, getContributionPr } from '../api/clearlyDefined'
 import EntitySpec from '../utils/entitySpec'
-import { uiContributionUpdateList, uiContributionDefinitions, UI_CONTRIBUTION_GET_URL } from './ui'
+import {
+  uiContributionUpdateList,
+  uiContributionDefinitions,
+  uiContributionRequests,
+  UI_CONTRIBUTION_GET_URL,
+  UI_CONTRIBUTION_PULL_REQUESTS
+} from './ui'
 
 export function getPrDataAction(token, prNumber) {
   return dispatch => {
@@ -40,5 +46,13 @@ export function getPrDataAction(token, prNumber) {
         dispatch(uiContributionDefinitions({ add: table }))
       })
       .catch(error => dispatch(actions.error(error)))
+  }
+}
+
+export function getPr(token) {
+  return dispatch => {
+    const actions = asyncActions(UI_CONTRIBUTION_PULL_REQUESTS)
+    dispatch(actions.start())
+    return getContributionPr(token).then(result => result.forEach(x => dispatch(uiContributionRequests({ add: x }))))
   }
 }

@@ -17,6 +17,7 @@ import {
   UI_CONTRIBUTION_GET_URL,
   UI_CONTRIBUTION_UPDATE_LIST,
   UI_CONTRIBUTION_DEFINITIONS,
+  UI_CONTRIBUTION_PULL_REQUESTS,
   UI_BROWSE_UPDATE_FILTER,
   UI_BROWSE_UPDATE_FILTER_LIST,
   UI_BROWSE_UPDATE_LIST,
@@ -101,7 +102,8 @@ const curate = combineReducers({
 const contribution = combineReducers({
   url: itemReducer(UI_CONTRIBUTION_GET_URL),
   componentList: listReducer(UI_CONTRIBUTION_UPDATE_LIST, null, EntitySpec.isEquivalent),
-  definitions: tableReducer(UI_CONTRIBUTION_DEFINITIONS)
+  definitions: tableReducer(UI_CONTRIBUTION_DEFINITIONS),
+  pr: listReducer(UI_CONTRIBUTION_PULL_REQUESTS, null, null)
 })
 
 const inspect = combineReducers({
